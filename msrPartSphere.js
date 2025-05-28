@@ -25,7 +25,16 @@ scene.add(new THREE.AmbientLight(0x404040));
 // 구 (wireframe)
 const sphereRadius = 3;
 const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
-const sphereMat = new THREE.MeshBasicMaterial({ color: 0x8888ff, wireframe: true });
+const sphereMat = new THREE.MeshBasicMaterial({
+  color: 0x8888ff,
+  wireframe: false,
+  transparent: true,
+  opacity: 0.2,  // ← 불투명도 낮추기
+  depthWrite: false  // 👈 핵심 설정
+});
+
+
+
 const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
 scene.add(sphereMesh);
 
@@ -39,42 +48,63 @@ const sliceCountText = document.getElementById('sliceCount');
 const leftBtn = document.getElementById('leftRuleBtn');
 const rightBtn = document.getElementById('rightRuleBtn');
 
+//슬라이더 고정
+sliceSlider.setAttribute("step", 2);
+sliceSlider.setAttribute("min", 8);
+sliceSlider.setAttribute("max", 200);
+
+
 let isRightRule = false;
 
 
 //부피계산
+const lowerVolumeText = document.getElementById('lowerVolume');
+const upperVolumeText = document.getElementById('upperVolume');
 const exactVolumeText = document.getElementById('exactVolume');
-const approxVolumeText = document.getElementById('approxVolume');
+
 
 function drawCylinders() {
   sliceGroup.clear();
   const n = parseInt(sliceSlider.value);
-  const dy = (2 * sphereRadius) / n;
-  let sum = 0;
+  const dx = (2 * sphereRadius) / n;
+
+  let lowerSum = 0;
+  let upperSum = 0;
 
   for (let i = 0; i < n; i++) {
-    const y = -sphereRadius + i * dy + (isRightRule ? 0 : dy);
-    const r = Math.sqrt(Math.max(sphereRadius ** 2 - y ** 2, 0));
-    const height = dy;
-    const area = r ** 2; // 밑면 넓이 (π 생략)
-    sum += area * dy;    // π 없이 부피 누적
+    const leftX = -sphereRadius + i * dx;
+    const rightX = leftX + dx;
 
-    const geometry = new THREE.CylinderGeometry(r, r, height, 32);
+    const rLeft = Math.sqrt(Math.max(sphereRadius ** 2 - leftX ** 2, 0));
+    const rRight = Math.sqrt(Math.max(sphereRadius ** 2 - rightX ** 2, 0));
+
+    const minR = Math.min(rLeft, rRight);
+    const maxR = Math.max(rLeft, rRight);
+
+    lowerSum += minR ** 2 * dx;
+    upperSum += maxR ** 2 * dx;
+
+    const r = isRightRule ? maxR : minR;
+    const geometry = new THREE.CylinderGeometry(r, r, dx, 32);
     const material = new THREE.MeshStandardMaterial({
-      color: 0xff8800,
+      color: isRightRule ? 0xff4444 : 0x44aa88,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.8,
     });
 
     const cylinder = new THREE.Mesh(geometry, material);
-    cylinder.position.set(0, y + (isRightRule ? dy / 2 : -dy / 2), 0);
+    cylinder.rotation.z = Math.PI / 2; // x축 방향으로 눕힘
+    cylinder.position.set(leftX + dx / 2, 0, 0);
     sliceGroup.add(cylinder);
   }
 
   const exactVolume = (4 / 3) * sphereRadius ** 3;
-  exactVolumeText.textContent = `${(4 / 3) * sphereRadius ** 3}π`;
-  approxVolumeText.textContent = `${sum.toFixed(3)}π`;
+
+  lowerVolumeText.textContent = `${lowerSum.toFixed(3)}π`;
+  upperVolumeText.textContent = `${upperSum.toFixed(3)}π`;
+  exactVolumeText.textContent = `${exactVolume.toFixed(3)}π`;
 }
+
 
 
 
@@ -96,6 +126,10 @@ sliceSlider.addEventListener('input', () => {
 
 
 drawCylinders(false); // 초기
+
+//rendering order
+sphereMesh.renderOrder = 0;
+sliceGroup.renderOrder = 1;
 
 // 애니메이션 루프
 function animate() {

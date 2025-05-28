@@ -13,10 +13,17 @@
     <button id="leftRuleBtn">하합 (Left Point Rule)</button>
     <button id="rightRuleBtn">상합 (Right Point Rule)</button>
   </div>
-  <div class="volume-display">
-    <p>구의 부피 (정확값): <span id="exactVolume"></span></p>
-    <p>현재 근사값: <span id="approxVolume"></span></p>
-  </div>
+<div class="volume-display">
+  <p>
+    근사값 비교: 
+    <span id="lowerVolume" style="color: #2c7;">하합</span> 
+    <span style="color: gray;">&lt;</span> 
+    <span id="exactVolume" style="color: #333;">구의 부피</span> 
+    <span style="color: gray;">&lt;</span> 
+    <span id="upperVolume" style="color: #d33;">상합</span>
+  </p>
+</div>
+
 
   <div id="sceneContainer"></div>
 
