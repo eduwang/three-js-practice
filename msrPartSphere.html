@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>구분구적법으로 구의 부피 이해하기</title>
+  <link rel="stylesheet" href="msrPartSphere.css">
+</head>
+<body>
+  <h1>📘 구의 부피 시각화 (구분구적법)</h1>
+  <div class="controls">
+    <label for="slices">구간 수: <span id="sliceCount">10</span></label>
+    <input type="range" id="slices" min="4" max="100" value="10">
+    <button id="leftRuleBtn">하합 (Left Point Rule)</button>
+    <button id="rightRuleBtn">상합 (Right Point Rule)</button>
+  </div>
+  <div class="volume-display">
+    <p>구의 부피 (정확값): <span id="exactVolume"></span></p>
+    <p>현재 근사값: <span id="approxVolume"></span></p>
+  </div>
+
+  <div id="sceneContainer"></div>
+
+  <script type="module" src="msrPartSphere.js"></script>
+</body>
+</html>
